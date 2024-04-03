@@ -2,33 +2,44 @@
 
 //imports:
 import javax.swing.JFrame;
-import javax.swing.Timer;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.ActionEvent;
 import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.RenderingHints.Key;
 import java.util.ArrayList;
 
 public class PacMan implements Runnable, KeyListener {
 
-    public static int WIDTH = 1000, HEIGHT = 800;
+    public static int WIDTH = 1000, HEIGHT = 800, GAMEUNIT = 40;
+    public static int[] XGRID = new int[WIDTH/GAMEUNIT], YGRID = new int[HEIGHT/GAMEUNIT];
+    //public boolean keyThread;
     private Color backgroundColor = new Color(0, 0, 0);
     private Screen screen = new Screen(backgroundColor);
+    Blocks_Walls blocks_walls = new Blocks_Walls();
     public static Player player = new Player();
-    public static ArrayList<Walls> wall = new ArrayList<>();
+    public static ArrayList<Wall> walls = new ArrayList<>();
     public static ArrayList<Block> blocks = new ArrayList<>();
-    // public static Walls walls = new Walls();
+    public static ArrayList<Integer> direction = new ArrayList<>();
+
+    /*
+     *1 = right
+     *2 = right
+     *3 = up
+     *4 = down
+     */
 
     public void setup() {
 
         // Walls
-        screen.setUpBlocks();
-        screen.setUpWalls();
+        blocks_walls.setUpBlocks();
+        blocks_walls.setUpWalls();
 
+        for(int i = 0; i < XGRID.length; i++){
+            XGRID[i] = GAMEUNIT*i;
+        }
+
+        for(int i = 0; i < YGRID.length; i++){
+            YGRID[i] = GAMEUNIT*i;
+        }
     }
 
     public void move() {
@@ -36,27 +47,22 @@ public class PacMan implements Runnable, KeyListener {
     }
 
     public void checkCollisions() {
-
         player.checkCollisions();
     }
 
     public void run() {
-
         while (true) {
-            screen.repaint();
             move();
             checkCollisions();
+            screen.repaint();
 
             try {
-                Thread.sleep(1000 / 30);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                Thread.sleep(1000/30);
+            } catch (InterruptedException e) {}
         }
     }
 
-    public void start() {
+    public void Load() {
         setup();
         JFrame frame = new JFrame();
         frame.setSize(WIDTH, HEIGHT);
@@ -70,33 +76,32 @@ public class PacMan implements Runnable, KeyListener {
 
         Thread t = new Thread(this);
         t.start();
-        // new Timer(1000/60, new ActionListener() {
-        // public void actionPerformed(ActionEvent e){
-
-        // screen.repaint();
-        // move();
-        // checkCollisions();
-
-        // }
-        // }).start();
     }
 
     public void keyPressed(KeyEvent e) {
 
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            player.setDirectionRight();
+            if(direction.size() <= 2){
+                direction.add(1);
+            }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            player.setDirectionLeft();
+            if(direction.size() <= 2){
+                direction.add(2);
+            }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_UP) {
-            player.setDirectionUp();
+            if(direction.size() <= 2){
+                direction.add(3);
+            }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            player.setDirectionDown();
+            if(direction.size() <= 2){
+                direction.add(4);
+            }
         }
     }
 
@@ -111,6 +116,6 @@ public class PacMan implements Runnable, KeyListener {
 
     public static void main(String[] args) {
         PacMan PacMan = new PacMan();
-        PacMan.start();
+        PacMan.Load();
     }
 }
